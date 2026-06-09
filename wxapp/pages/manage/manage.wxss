@@ -1,0 +1,183 @@
+/* pages/manage/manage.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.card {
+  background: white;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin: 20rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #007bff;
+  display: block;
+  text-align: center;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #6c757d;
+  display: block;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  border-bottom: 2rpx solid #007bff;
+  padding-bottom: 10rpx;
+}
+
+.blacklist-container {
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.blacklist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  margin: 10rpx 0;
+  background: #f9f9f9;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.user-id {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 5rpx;
+}
+
+.reason {
+  font-size: 28rpx;
+  color: #dc3545;
+  display: block;
+  margin-bottom: 5rpx;
+}
+
+.add-time {
+  font-size: 24rpx;
+  color: #6c757d;
+  display: block;
+}
+
+.btn-remove {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6rpx;
+  padding: 10rpx 20rpx;
+  font-size: 28rpx;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin: 20rpx 0;
+}
+
+.label {
+  font-size: 32rpx;
+  margin-right: 20rpx;
+  min-width: 120rpx;
+}
+
+.input {
+  flex: 1;
+  border: 2rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 32rpx;
+}
+
+.btn {
+  width: 100%;
+  height: 80rpx;
+  border-radius: 8rpx;
+  border: none;
+  font-size: 32rpx;
+  margin: 10rpx 0;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn:disabled {
+  background: #ccc;
+  color: #666;
+}
+
+.user-container {
+  max-height: 300rpx;
+  overflow-y: auto;
+}
+
+.user-item {
+  padding: 15rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  margin: 10rpx 0;
+  background: #f9f9f9;
+}
+
+.user-id {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.empty-list {
+  text-align: center;
+  color: #6c757d;
+  font-size: 28rpx;
+  padding: 40rpx;
+}
+
+.message {
+  font-size: 28rpx;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  text-align: center;
+}
+
+.message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1rpx solid #c3e6cb;
+}
+
+.message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1rpx solid #f5c6cb;
+}
+
+.message.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1rpx solid #bee5eb;
+}

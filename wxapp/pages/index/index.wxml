@@ -1,0 +1,118 @@
+<!--pages/index/index.wxml - 智能仪表盘-->
+<view class="container">
+
+  <!-- 加载中 -->
+  <view wx:if="{{isLoading}}" class="loading-box">
+    <text>加载中...</text>
+  </view>
+
+  <!-- ========== 未登录 ========== -->
+  <view wx:if="{{!userInfo && !isLoading}}" class="login-card">
+    <view class="login-icon">🏫</view>
+    <text class="login-title">智安校园</text>
+    <text class="login-sub">宿舍智能管理系统</text>
+    <button class="btn-primary" bindtap="goToLogin">立即登录</button>
+  </view>
+
+  <!-- ========== 已登录 ========== -->
+  <block wx:if="{{userInfo && !isLoading}}">
+
+    <!-- 用户条 -->
+    <view class="user-bar">
+      <view class="user-avatar">{{userInfo.name[0]}}</view>
+      <view class="user-info">
+        <text class="user-name">{{userInfo.name}}</text>
+        <text class="user-dorm">{{userInfo.dormitory || '未绑定宿舍'}} · {{isAdmin ? '管理员' : '学生'}}</text>
+      </view>
+      <view class="user-badge" wx:if="{{isAdmin}}">管理</view>
+    </view>
+
+    <!-- ====== 管理员仪表盘 ====== -->
+    <block wx:if="{{isAdmin}}">
+      <!-- 数据概览卡片 -->
+      <view class="stats-row">
+        <view class="stat-card">
+          <text class="stat-num">{{overview.today_access || 0}}</text>
+          <text class="stat-label">今日通行</text>
+        </view>
+        <view class="stat-card warn">
+          <text class="stat-num">{{overview.pending_visitors || 0}}</text>
+          <text class="stat-label">待审核访客</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-num">{{overview.pending_repairs || 0}}</text>
+          <text class="stat-label">待处理维修</text>
+        </view>
+        <view class="stat-card" wx:if="{{overview.alarm_energy > 0}}">
+          <text class="stat-num red">{{overview.alarm_energy}}</text>
+          <text class="stat-label">能耗告警</text>
+        </view>
+      </view>
+
+      <!-- 待办事项 -->
+      <view class="section" wx:if="{{todos.length > 0}}">
+        <view class="section-title">⏰ 待办提醒</view>
+        <view class="todo-item" wx:for="{{todos}}" wx:key="type">
+          <view class="todo-dot {{item.urgent ? 'urgent' : ''}}"></view>
+          <text>{{item.text}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- ====== 学生仪表盘 ====== -->
+    <block wx:if="{{!isAdmin}}">
+      <!-- 本月能耗 -->
+      <view class="section">
+        <view class="section-title">⚡ 本月能耗</view>
+        <view class="energy-row">
+          <view class="energy-card elec">
+            <text class="energy-val">{{energy.electricity.consumption || 0}} 度</text>
+            <text class="energy-cost">¥{{energy.electricity.cost || 0}}</text>
+            <text class="energy-tag" wx:if="{{energy.electricity.alarm}}">⚠ 告警</text>
+          </view>
+          <view class="energy-card water">
+            <text class="energy-val">{{energy.water.consumption || 0}} 吨</text>
+            <text class="energy-cost">¥{{energy.water.cost || 0}}</text>
+            <text class="energy-tag" wx:if="{{energy.water.alarm}}">⚠ 告警</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 今日通行 -->
+      <view class="section" wx:if="{{todayAccess.count > 0}}">
+        <view class="section-title">🚪 今日通行</view>
+        <view class="access-summary">
+          <text>已通行 {{todayAccess.count}} 次</text>
+          <text wx:if="{{todayAccess.last_time}}">，最近 {{todayAccess.last_time}}</text>
+          <text class="access-status {{todayAccess.status}}">{{todayAccess.status === 'allowed' ? '✓ 允许' : '✗ 拒绝'}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- ====== 快捷入口（通用） ====== -->
+    <view class="section">
+      <view class="section-title">📌 快捷功能</view>
+      <view class="quick-grid">
+        <view class="quick-item" wx:for="{{quickActions}}" wx:key="key"
+              bindtap="onQuickAction" data-key="{{item.key}}">
+          <text class="quick-icon">{{item.icon}}</text>
+          <text class="quick-text">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ====== 公告（通用） ====== -->
+    <view class="section" wx:if="{{notices.length > 0}}">
+      <view class="section-title">📢 最新通知</view>
+      <view class="notice-item" wx:for="{{notices}}" wx:key="id"
+            bindtap="onNoticeTap" data-index="{{index}}">
+        <view class="notice-tag {{item.type}}">{{item.type === 'warning' ? '⚠' : 'ℹ'}}</view>
+        <view class="notice-body">
+          <text class="notice-title">{{item.title}}</text>
+          <text class="notice-time">{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+
+  </block>
+</view>

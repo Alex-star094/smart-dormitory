@@ -1,0 +1,228 @@
+<view class="container">
+  <!-- 消息提示 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+
+  <!-- 搜索栏（管理员） -->
+  <view class="card" wx:if="{{userInfo && userInfo.role === 'admin'}}">
+    <view class="card-header">
+      <text class="card-title">能耗列表搜索</text>
+    </view>
+    <view class="search-container">
+      <input 
+        class="search-input" 
+        placeholder="输入宿舍号或关键词" 
+        bindinput="onSearchInput" 
+        value="{{searchKeyword}}"
+      />
+      <button class="btn-search" bindtap="searchEnergy">搜索</button>
+    </view>
+    <view class="filter-group">
+      <picker 
+        class="filter-picker" 
+        mode="selector" 
+        range="{{['全部类型', '电力', '用水']}}" 
+        value="{{energyTypeFilter}}" 
+        bindchange="onEnergyTypeFilterChange"
+      >
+        <view class="picker-display">{{['全部类型', '电力', '用水'][energyTypeFilter]}}</view>
+      </picker>
+      <picker 
+        class="filter-picker" 
+        mode="selector" 
+        range="{{['全部状态', '仅看告警', '只看正常']}}" 
+        value="{{alarmFilter}}" 
+        bindchange="onAlarmFilterChange"
+      >
+        <view class="picker-display">{{['全部状态', '仅看告警', '只看正常'][alarmFilter]}}</view>
+      </picker>
+      <input 
+        class="month-input" 
+        placeholder="月份 YYYY-MM" 
+        bindinput="onMonthInput" 
+        value="{{monthFilter}}"
+      />
+    </view>
+  </view>
+
+  <!-- 能耗列表 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">
+        {{userInfo && userInfo.role === 'admin' ? '能耗列表（全部宿舍）' : '我的能耗列表'}}
+      </text>
+      <button class="btn-refresh" bindtap="refreshEnergyList">刷新</button>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view wx:if="{{isLoading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+    
+    <!-- 空状态 -->
+    <view wx:elif="{{!energyList || energyList.length === 0}}" class="no-data">
+      <text>暂无能耗记录</text>
+    </view>
+    
+    <!-- 能耗列表 -->
+    <view wx:else class="energy-list">
+      <view class="energy-item" wx:for="{{energyList}}" wx:key="id">
+        <view class="energy-header">
+          <text class="dormitory">{{item.dormitory}}</text>
+          <text class="energy-type {{item.energy_type}}">
+            {{item.energy_type_cn}}
+          </text>
+        </view>
+        
+        <view class="energy-details">
+          <view class="detail-item">
+            <text class="label">消耗量：</text>
+            <text class="value">{{item.consumption}} {{item.unit}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">费用：</text>
+            <text class="value">¥{{item.cost || '0.00'}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">月份：</text>
+            <text class="value">{{item.month}}</text>
+          </view>
+        </view>
+        
+        <!-- 告警状态 -->
+        <view wx:if="{{item.alarm}}" class="alarm-warning">
+          <text class="alarm-icon">⚠️</text>
+          <text class="alarm-text">{{item.alarm_reason || '能耗异常'}}</text>
+          <text class="alarm-time">{{item.created_at.slice(0, 10)}}</text>
+        </view>
+        
+        <!-- 管理员操作按钮 -->
+        <view wx:if="{{userInfo && userInfo.role === 'admin' && !item.alarm}}" class="admin-actions">
+          <button 
+            class="btn-alarm" 
+            size="mini"
+            bindtap="triggerAlarmForRecord"
+            data-record-id="{{item.id}}"
+          >
+            标记告警
+          </button>
+        </view>
+      </view>
+      
+      <!-- 分页加载更多 -->
+      <view wx:if="{{hasMore}}" class="load-more">
+        <button class="btn-load-more" bindtap="loadMore">加载更多</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学生添加能耗记录表单（保持不变） -->
+  <view wx:if="{{userInfo && userInfo.role === 'student'}}" class="card">
+    <!-- 原有表单内容保持不变 -->
+    <view class="card-header">
+      <text class="card-title">记录能耗</text>
+    </view>
+    <view class="form-group">
+      <text class="label">宿舍号：</text>
+      <input 
+        class="input" 
+        placeholder="例如：A101" 
+        bindinput="onDormitoryInput" 
+        value="{{recordData.dormitory}}"
+        readonly="{{recordData.dormitory}}" 
+      />
+    </view>
+    <view class="form-group">
+      <text class="label">能源类型：</text>
+      <picker 
+        class="input" 
+        mode="selector" 
+        range="{{energyTypes}}" 
+        bindchange="onEnergyTypeChange" 
+        value="{{energyTypeIndex}}"
+      >
+        <view class="picker-display">{{energyTypes[energyTypeIndex]}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <text class="label">消耗量：</text>
+      <input 
+        class="input" 
+        type="number"
+        placeholder="例如：150.5" 
+        bindinput="onConsumptionInput" 
+        value="{{recordData.consumption}}"
+      />
+    </view>
+    <view class="form-group">
+      <text class="label">单位：</text>
+      <input 
+        class="input" 
+        placeholder="例如：度" 
+        bindinput="onUnitInput" 
+        value="{{recordData.unit}}"
+        readonly="{{recordData.unit}}" 
+      />
+    </view>
+    <view class="form-group">
+      <text class="label">费用：</text>
+      <view class="cost-display">¥{{previewCost}}</view>
+      <text class="cost-tips">（系统自动计算，无需手动输入）</text>
+    </view>
+    <view class="form-group">
+      <text class="label">月份：</text>
+      <input 
+        class="input" 
+        placeholder="例如：2024-12" 
+        value="{{recordData.month}}"
+        bindinput="onMonthInputForm" 
+      />
+    </view>
+    <button 
+      class="btn btn-primary" 
+      bindtap="recordConsumption" 
+      disabled="{{isRecording}}"
+    >
+      {{isRecording ? '记录中...' : '记录能耗'}}
+    </button>
+  </view>
+
+  <!-- 管理员触发告警弹窗（保持不变） -->
+  <view class="modal-mask" wx:if="{{showAlarmModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">触发能耗告警</text>
+        <button class="modal-close" bindtap="closeAlarmModal">×</button>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">告警原因（可选）：</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入告警原因（如：能耗超限）"
+            value="{{alarmReason}}"
+            bindinput="onAlarmReasonInput"
+          />
+        </view>
+        <text class="tips">未输入原因将自动生成默认文案</text>
+      </view>
+      <view class="modal-footer">
+        <button 
+          class="btn cancel-btn" 
+          bindtap="closeAlarmModal"
+          disabled="{{isOperating}}"
+        >
+          取消
+        </button>
+        <button 
+          class="btn confirm-btn" 
+          bindtap="triggerAlarm"
+          disabled="{{isOperating}}"
+        >
+          {{isOperating ? '提交中...' : '确认触发'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

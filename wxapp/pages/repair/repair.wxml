@@ -1,0 +1,249 @@
+<!-- pages/repair/repair.wxml -->
+<view class="container">
+  <!-- 维修记录（管理员显示所有，学生显示我的） -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">{{isAdmin ? '所有维修记录' : '我的维修记录'}}</text>
+      <button class="btn-refresh" bindtap="refreshRecords">刷新</button>
+    </view>
+    <!-- 记录列表 -->
+    <view class="records-container" wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id">
+        <view class="record-info">
+          <!-- 管理员额外显示：宿舍号 -->
+          <view class="record-row" wx:if="{{isAdmin}}">
+            <text class="label">宿舍号：</text>
+            <text class="value">{{item.dormitory}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">维修标题：</text>
+            <text class="value">{{item.title}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">问题描述：</text>
+            <text class="value">{{item.description}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">类别：</text>
+            <text class="value">{{item.category}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">优先级：</text>
+            <text class="value">{{item.priority}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">位置：</text>
+            <text class="value">{{item.location}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">联系人：</text>
+            <text class="value">{{item.contact_phone}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">提交时间：</text>
+            <text class="value">{{item.created_at}}</text>
+          </view>
+          <!-- 管理员额外显示：维修人员ID -->
+          <view class="record-row" wx:if="{{isAdmin && item.assigned_to}}">
+            <text class="label">维修人员ID：</text>
+            <text class="value">{{item.assigned_to}}</text>
+          </view>
+          <!-- 已完成记录显示结果和费用 -->
+          <view class="record-row" wx:if="{{item.status === 'completed'}}">
+            <text class="label">维修结果：</text>
+            <text class="value">{{item.repair_result}}</text>
+          </view>
+          <view class="record-row" wx:if="{{item.status === 'completed'}}">
+            <text class="label">维修费用：</text>
+            <text class="value">¥{{item.cost}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">状态：</text>
+            <text class="status {{item.status === 'completed' ? 'completed' : item.status === 'processing' ? 'in_progress' : 'pending'}}">
+              {{item.status === 'completed' ? '已完成' : item.status === 'processing' ? '进行中' : '待处理'}}
+            </text>
+          </view>
+        </view>
+        <!-- 管理员专属：处理维修按钮 -->
+        <button 
+          class="btn btn-operate" 
+          wx:if="{{isAdmin}}" 
+          bindtap="openOperateModal" 
+          data-repair-id="{{item.id}}"
+        >
+          处理维修
+        </button>
+      </view>
+    </view>
+    <!-- 空列表提示 -->
+    <view class="empty-list" wx:else>
+      <text>暂无维修记录</text>
+    </view>
+  </view>
+
+  <!-- 提交维修申请（仅学生端显示） -->
+  <view class="card" wx:if="{{!isAdmin}}">
+    <view class="card-header">
+      <text class="card-title">提交维修申请</text>
+    </view>
+    <view class="form-section">
+      <view class="form-group">
+        <text class="label">标题：</text>
+        <input 
+          class="input" 
+          placeholder="请输入维修标题" 
+          bindinput="onTitleInput" 
+          value="{{submitData.title}}"
+        />
+      </view>
+      <view class="form-group">
+        <text class="label">问题描述：</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请详细描述维修问题" 
+          bindinput="onDescriptionInput" 
+          value="{{submitData.description}}"
+        />
+      </view>
+      <view class="form-group">
+        <text class="label">类别：</text>
+        <input 
+          class="input" 
+          placeholder="请输入维修类别（如：水电故障）" 
+          bindinput="onCategoryInput" 
+          value="{{submitData.category}}"
+        />
+      </view>
+      <view class="form-group">
+        <text class="label">优先级：</text>
+        <!-- 修复：picker标签value属性语法，使用字符串索引 -->
+        <picker 
+          class="input" 
+          mode="selector" 
+          range="{{priorities}}" 
+          bindchange="onPriorityChange" 
+          value="{{priorityIndex + ''}}"  
+        >
+          <view class="picker-display">{{priorities[priorityIndex]}}</view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <text class="label">位置：</text>
+        <input 
+          class="input" 
+          placeholder="请输入问题位置（如：3-201卫生间）" 
+          bindinput="onLocationInput" 
+          value="{{submitData.location}}"
+        />
+      </view>
+      <view class="form-group">
+        <text class="label">联系电话：</text>
+        <input 
+          class="input" 
+          placeholder="请输入联系电话" 
+          bindinput="onContactInput" 
+          value="{{submitData.contact_phone}}" 
+          type="number"
+        />
+      </view>
+      <button 
+        class="btn btn-primary" 
+        bindtap="submitRepair" 
+        disabled="{{isSubmitting || !submitData.title || !submitData.description || !submitData.category || !submitData.location || !submitData.contact_phone}}"
+      >
+        {{isSubmitting ? '提交中...' : '提交申请'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 消息提示 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType === 'error' ? 'error' : 'success'}}">{{message}}</text>
+  </view>
+
+  <!-- 管理员操作弹窗 -->
+  <view class="modal-mask" wx:if="{{showOperateModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">处理维修记录</text>
+        <button class="modal-close" bindtap="closeOperateModal">×</button>
+      </view>
+      <view class="form-section">
+        <view class="form-group">
+          <text class="label">维修人员ID：</text>
+          <input 
+            class="input" 
+            bindinput="onOperateFormInput" 
+            data-key="repairerId"
+            value="{{operateForm.repairerId}}"
+          />
+        </view>
+        <view class="form-group">
+          <text class="label">维修状态：</text>
+          <!-- 核心修复：picker的value属性，避免复杂表达式，用单独变量存储索引 -->
+          <picker 
+            class="input" 
+            mode="selector" 
+            range="{{repairStatusOptions}}" 
+            range-key="label"
+            bindchange="onRepairStatusChange"
+            value="{{repairStatusIndex + ''}}"  
+          >
+          <view class="picker-display">
+      <text wx:if="{{repairStatusOptions[repairStatusIndex]}}">{{repairStatusOptions[repairStatusIndex].label}}</text>
+      <text wx:else>选择状态</text>
+        </view>
+      </picker>
+        </view>
+        <view class="form-group">
+          <text class="label">预计维修时间：</text>
+          <input 
+            class="input" 
+            placeholder="格式：YYYY-MM-DD" 
+            bindinput="onOperateFormInput" 
+            data-key="expectedTime"
+            value="{{operateForm.expectedTime}}"
+          />
+        </view>
+        <view class="form-group">
+          <text class="label">维修备注：</text>
+          <textarea 
+            class="textarea" 
+            placeholder="填写维修过程备注" 
+            bindinput="onOperateFormInput" 
+            data-key="repairNotes"
+            value="{{operateForm.repairNotes}}"
+          />
+        </view>
+        <view class="form-group">
+          <text class="label">维修结果：</text>
+          <textarea 
+            class="textarea" 
+            placeholder="已完成状态必填" 
+            bindinput="onOperateFormInput" 
+            data-key="repairResult"
+            value="{{operateForm.repairResult}}"
+          />
+        </view>
+        <view class="form-group">
+          <text class="label">维修费用（元）：</text>
+          <input 
+            class="input" 
+            placeholder="已完成状态必填" 
+            bindinput="onOperateFormInput" 
+            data-key="cost"
+            value="{{operateForm.cost}}"
+            type="number"
+          />
+        </view>
+        <button 
+          class="btn btn-primary" 
+          bindtap="submitOperate" 
+          disabled="{{isOperating}}"
+        >
+          {{isOperating ? '提交中...' : '确认提交'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

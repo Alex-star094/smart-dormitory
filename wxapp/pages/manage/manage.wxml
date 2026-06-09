@@ -1,0 +1,67 @@
+<!-- pages/manage/manage.wxml -->
+<view class="container">
+  <view class="card">
+    <text class="title">系统管理</text>
+    <text class="subtitle">黑名单管理和用户管理</text>
+  </view>
+
+  <!-- 黑名单列表 -->
+  <view class="card">
+    <view class="section-title">黑名单用户</view>
+    <view class="blacklist-container" wx:if="{{blacklist.length > 0}}">
+      <view class="blacklist-item" wx:for="{{blacklist}}" wx:key="id">
+        <view class="item-info">
+          <text class="user-id">{{item.userId}}</text>
+          <text class="reason">原因：{{item.reason}}</text>
+          <text class="add-time">添加时间：{{item.addTime}}</text>
+        </view>
+        <button class="btn-remove" bindtap="removeFromBlacklist" data-record="{{item.id}}">
+          移除
+        </button>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无黑名单用户</text>
+    </view>
+  </view>
+
+  <!-- 添加黑名单 -->
+  <view class="card">
+    <view class="section-title">添加黑名单</view>
+    <view class="input-group">
+      <text class="label">用户ID：</text>
+      <input class="input" placeholder="请输入用户ID" bindinput="onUserIdInput" value="{{newUserId}}"/>
+    </view>
+    <view class="input-group">
+      <text class="label">原因：</text>
+      <input class="input" placeholder="请输入添加原因" bindinput="onReasonInput" value="{{reason}}"/>
+    </view>
+    <button class="btn btn-primary" bindtap="addToBlacklist" disabled="{{!newUserId || !reason || isAdding}}">
+      {{isAdding ? '添加中...' : '添加黑名单'}}
+    </button>
+  </view>
+
+  <!-- 用户列表 -->
+  <view class="card">
+    <view class="section-title">已注册用户</view>
+    <view class="user-container" wx:if="{{users.length > 0}}">
+      <view class="user-item" wx:for="{{users}}" wx:key="userId">
+        <text class="user-id">{{item.username}} ({{item.student_id}})</text>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无注册用户</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="card">
+    <button class="btn btn-secondary" bindtap="refreshData">
+      刷新数据
+    </button>
+  </view>
+
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+</view>

@@ -1,0 +1,53 @@
+<!-- pages/access/access.wxml -->
+<view class="container">
+  <!-- 通行记录 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">通行记录</text>
+      <button class="btn-refresh" bindtap="refreshRecords">刷新</button>
+    </view>
+
+    <view class="records-container" wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id">
+        <view class="record-info">
+          <view class="record-row">
+            <text class="label">时间：</text>
+            <text class="value">{{item.access_time}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">宿舍：</text>
+            <text class="value">{{item.dormitory}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">方式：</text>
+            <text class="value">{{item.access_type}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">用户名：</text>
+            <text class="value">{{item.username}}</text>
+          </view>
+          <view class="record-row">
+            <text class="label">状态：</text>
+            <text class="status {{item.status === 'allowed' ? 'success' : 'failed'}}">{{item.status === 'allowed' ? '允许' : item.status === 'denied' ? '拒绝' : item.status}}</text>
+          </view>
+          <view class="record-row" wx:if="{{item.alarm}}">
+            <text class="label">告警：</text>
+            <text class="alarm">是</text>
+          </view>
+          <view class="record-row" wx:if="{{item.notes}}">
+            <text class="label">备注：</text>
+            <text class="value">{{item.notes}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无通行记录</text>
+    </view>
+  </view>
+
+  <!-- 消息提示 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+</view>

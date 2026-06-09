@@ -1,0 +1,93 @@
+<!-- pages/login/login.wxml -->
+<view class="container">
+  <!-- 登录方式选择 -->
+  <view class="card">
+    <view class="login-tabs">
+      <view class="tab {{loginMethod === 'face' ? 'active' : ''}}" bindtap="switchLoginMethod" data-method="face">
+        <text class="tab-text">人脸识别</text>
+      </view>
+      <view class="tab {{loginMethod === 'password' ? 'active' : ''}}" bindtap="switchLoginMethod" data-method="password">
+        <text class="tab-text">学号密码登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 人脸识别登录 -->
+  <view class="card" wx:if="{{loginMethod === 'face'}}">
+    <text class="title">人脸登录</text>
+    <text class="subtitle">请面向摄像头，系统将自动识别您的身份</text>
+  </view>
+
+  <view class="card" wx:if="{{loginMethod === 'face' && showCamera}}">
+    <view class="camera-container">
+      <camera
+        class="camera"
+        device-position="front"
+        flash="off"
+        binderror="cameraError"
+        bindready="onCameraReady">
+      </camera>
+      <view class="overlay">
+        <view class="countdown" wx:if="{{countdown > 0}}">
+          {{countdown}}秒后自动识别
+        </view>
+        <view class="instructions" wx:else>
+          请正对摄像头，保持面部清晰
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 密码登录 -->
+  <view class="card" wx:if="{{loginMethod === 'password'}}">
+    <text class="title">密码登录</text>
+    <text class="subtitle">请输入您的学号和密码</text>
+
+    <view class="form-group">
+      <input
+        class="input"
+        type="text"
+        placeholder="请输入学号"
+        value="{{studentId}}"
+        bindinput="onStudentIdInput">
+      </input>
+    </view>
+
+    <view class="form-group">
+      <input
+        class="input"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput">
+      </input>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="card">
+    <!-- 人脸识别按钮 -->
+    <view wx:if="{{loginMethod === 'face'}}">
+      <button class="btn btn-primary" bindtap="startFaceLogin" disabled="{{isLoggingIn}}">
+        {{isLoggingIn ? '识别中...' : '开始登录'}}
+      </button>
+      <button class="btn btn-secondary" bindtap="takeFacePhoto" wx:if="{{!isLoggingIn && showCamera}}">
+        手动拍照
+      </button>
+    </view>
+
+    <!-- 密码登录按钮 -->
+    <view wx:if="{{loginMethod === 'password'}}">
+      <button class="btn btn-primary" bindtap="passwordLogin" disabled="{{isLoggingIn}}">
+        {{isLoggingIn ? '登录中...' : '登录'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 登录结果提示（优先级高于普通消息） -->
+  <view class="card message-card" wx:if="{{message}}">
+    <text class="message {{messageType === 'success' ? 'success' : (messageType === 'error' ? 'error' : 'info')}}">
+      {{message}}
+    </text>
+  </view>
+</view>

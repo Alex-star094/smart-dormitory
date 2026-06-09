@@ -1,0 +1,88 @@
+<!-- pages/visitors/visitors.wxml -->
+<view class="container">
+  <!-- 访客列表 -->
+  <view wx:if="{{userInfo}}">
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">访客列表</text>
+      <button class="btn-refresh" bindtap="refreshVisitors">刷新</button>
+    </view>
+
+    <view class="visitors-container" wx:if="{{visitors.length > 0}}">
+      <view class="visitor-item" wx:for="{{visitors}}" wx:key="id">
+        <view class="visitor-info">
+          <view class="visitor-row">
+            <text class="label">姓名：</text>
+            <text class="value">{{item.visitor_name}}</text>
+          </view>
+          <view class="visitor-row">
+            <text class="label">学号/工号：</text>
+            <text class="value">{{item.id_card}}</text>
+          </view>
+          <view class="visitor-row">
+            <text class="label">访问时间：</text>
+            <text class="value">{{item.visit_date}}</text>
+          </view>
+          <view class="visitor-row">
+            <text class="label">访问事由：</text>
+            <text class="value">{{item.visit_reason}}</text>
+          </view>
+          <view class="visitor-row">
+            <text class="label">状态：</text>
+            <text class="status {{item.status === 'approved' ? 'approved' : item.status === 'pending' ? 'pending' : 'rejected'}}">
+              {{item.status === 'approved' ? '已批准' : item.status === 'pending' ? '待审核' : '已拒绝'}}
+            </text>
+          </view>
+          <view class="visitor-row" wx:if="{{userInfo && userInfo.role === 'admin'}}">
+            <text class="label">申请人：</text>
+            <text class="value">{{item.booker}} ({{item.booker_student_id}})</text>
+          </view>
+        </view>
+        <view class="visitor-actions" wx:if="{{item.status === 'pending' && userInfo && userInfo.role === 'admin'}}">
+          <button class="btn-small btn-success" bindtap="approveVisitor" data-id="{{item.id}}">批准</button>
+          <button class="btn-small btn-danger" bindtap="rejectVisitor" data-id="{{item.id}}">拒绝</button>
+        </view>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无访客记录</text>
+    </view>
+  </view>
+
+  <!-- 添加访客 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">添加访客</text>
+    </view>
+
+    <view class="form-section">
+      <view class="form-group">
+        <text class="label">访客姓名：</text>
+        <input class="input" placeholder="请输入访客姓名" bindinput="onNameInput" value="{{newVisitor.name}}"/>
+      </view>
+      <view class="form-group">
+        <text class="label">学号/工号：</text>
+        <input class="input" placeholder="请输入18位身份证号" bindinput="onContactInput" value="{{newVisitor.contact}}"/>
+      </view>
+      <view class="form-group">
+        <text class="label">访问事由：</text>
+        <input class="input" placeholder="请输入访问事由" bindinput="onReasonInput" value="{{newVisitor.reason}}"/>
+      </view>
+      <view class="form-group">
+        <text class="label">访问日期：</text>
+        <picker class="picker" mode="date" value="{{visitTime}}" bindchange="onTimeChange">
+          <view class="picker-display">{{visitTime || '请选择访问日期'}}</view>
+        </picker>
+      </view>
+      <button class="btn btn-primary" bindtap="addVisitor" disabled="{{isAdding || !newVisitor.name || !newVisitor.contact || !newVisitor.reason || !visitTime}}">
+        {{isAdding ? '添加中...' : '添加访客'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 消息提示 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+  </view>
+</view>

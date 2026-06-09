@@ -1,0 +1,77 @@
+# =============================================
+# 智安校园 - 一键部署配置
+# 启动: docker-compose up -d
+# 查看日志: docker-compose logs -f app
+# 停止: docker-compose down
+# =============================================
+
+version: "3.8"
+
+services:
+  # ---- MySQL 数据库 ----
+  mysql:
+    image: mysql:8.0
+    container_name: smart_dorm_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-Jiajie200494}
+      MYSQL_DATABASE: ${DB_NAME:-smart_dorm}
+      MYSQL_CHARSET: utf8mb4
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smart_dorm_net
+
+  # ---- Redis 缓存 ----
+  redis:
+    image: redis:7-alpine
+    container_name: smart_dorm_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smart_dorm_net
+
+  # ---- FastAPI 应用 ----
+  app:
+    build: .
+    container_name: smart_dorm_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_TYPE=mysql
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - smart_dorm_net
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  smart_dorm_net:
+    driver: bridge

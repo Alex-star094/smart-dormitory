@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "智安校园 - 宿舍智能管理系统 API",
+    "description": "FastAPI 后端 API 集合，包含认证、用户、通行、能耗、维修、访客、黑名单、仪表盘、数据导出等模块。\n\n使用方法：\n1. 设置 collection 变量 baseUrl = http://localhost:8000\n2. 先调用「认证 → 密码登录」获取 token\n3. Token 会自动设置到其他请求的 Authorization header",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "🔐 认证",
+      "item": [
+        {
+          "name": "密码登录 (学生)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json();",
+                  "if (data.access_token) {",
+                  "  pm.collectionVariables.set('token', data.access_token);",
+                  "  console.log('Token set: ' + data.access_token.substring(0,30) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "2024001", "type": "text" },
+                { "key": "password", "value": "123456", "type": "text" },
+                { "key": "grant_type", "value": "password", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/token", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "token"] }
+          }
+        },
+        {
+          "name": "密码登录 (管理员)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "admin001", "type": "text" },
+                { "key": "password", "value": "admin123", "type": "text" },
+                { "key": "grant_type", "value": "password", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/token", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "token"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 用户管理",
+      "item": [
+        {
+          "name": "获取个人信息",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/users/profile", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "profile"] }
+          }
+        },
+        {
+          "name": "更新个人信息",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile?dormitory=3-201&phone=13800138001",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "profile"],
+              "query": [
+                { "key": "dormitory", "value": "3-201" },
+                { "key": "phone", "value": "13800138001" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "用户列表 (管理员)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/list?skip=0&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "list"],
+              "query": [
+                { "key": "skip", "value": "0" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 仪表盘",
+      "item": [
+        {
+          "name": "仪表盘统计",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dashboard", "stats"] }
+          }
+        },
+        {
+          "name": "能耗图表数据",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dashboard/energy-chart?months=6",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "dashboard", "energy-chart"],
+              "query": [{ "key": "months", "value": "6" }]
+            }
+          }
+        },
+        {
+          "name": "公告列表",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/dashboard/notices", "host": ["{{baseUrl}}"], "path": ["api", "v1", "dashboard", "notices"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚪 通行管理",
+      "item": [
+        {
+          "name": "通行记录列表",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/access/records?skip=0&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "access", "records"],
+              "query": [
+                { "key": "skip", "value": "0" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚡ 能耗管理",
+      "item": [
+        {
+          "name": "能耗列表",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/energy/list?skip=0&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "energy", "list"],
+              "query": [
+                { "key": "skip", "value": "0" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "当月能耗",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/energy/current-month", "host": ["{{baseUrl}}"], "path": ["api", "v1", "energy", "current-month"] }
+          }
+        },
+        {
+          "name": "能耗统计",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/energy/statistics?dormitory=3-201&start_month=2026-01&end_month=2026-06",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "energy", "statistics"],
+              "query": [
+                { "key": "dormitory", "value": "3-201" },
+                { "key": "start_month", "value": "2026-01" },
+                { "key": "end_month", "value": "2026-06" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 维修管理",
+      "item": [
+        {
+          "name": "我的维修",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/repair/my", "host": ["{{baseUrl}}"], "path": ["api", "v1", "repair", "my"] }
+          }
+        },
+        {
+          "name": "维修列表 (管理员)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/repair/list?skip=0&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "repair", "list"],
+              "query": [
+                { "key": "skip", "value": "0" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 访客管理",
+      "item": [
+        {
+          "name": "我的访客",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/visitors/my", "host": ["{{baseUrl}}"], "path": ["api", "v1", "visitors", "my"] }
+          }
+        },
+        {
+          "name": "访客列表 (管理员)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/visitors/list?skip=0&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "visitors", "list"],
+              "query": [
+                { "key": "skip", "value": "0" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚫 黑名单",
+      "item": [
+        {
+          "name": "生效中黑名单",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/blacklist/active",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "blacklist", "active"]
+            }
+          }
+        },
+        {
+          "name": "检查黑名单",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student_id\": \"2024001\", \"name\": \"张三\"}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/blacklist/check", "host": ["{{baseUrl}}"], "path": ["api", "v1", "blacklist", "check"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📥 数据导出",
+      "item": [
+        {
+          "name": "导出通行记录 (Excel)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/export/access-records",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "export", "access-records"]
+            }
+          }
+        },
+        {
+          "name": "导出能耗记录 (Excel)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/export/energy?month=2026-06",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "export", "energy"],
+              "query": [{ "key": "month", "value": "2026-06" }]
+            }
+          }
+        },
+        {
+          "name": "导出维修记录 (Excel)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/export/repairs",
+              "host": ["{{baseUrl}}"], "path": ["api", "v1", "export", "repairs"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

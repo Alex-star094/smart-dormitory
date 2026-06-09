@@ -1,0 +1,79 @@
+<!-- pages/profile/profile.wxml -->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">个人信息</text>
+      <button class="btn-refresh" bindtap="refreshProfile">刷新</button>
+    </view>
+
+    <view wx:if="{{profile}}" class="profile-info">
+      <view class="info-item">
+        <text class="label">学号：</text>
+        <text class="value">{{profile.student_id}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">姓名：</text>
+        <text class="value">{{profile.username}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">宿舍号：</text>
+        <text class="value">{{profile.dormitory}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">手机号：</text>
+        <text class="value">{{profile.phone}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">角色：</text>
+        <text class="value">{{profile.role}}</text>
+      </view>
+    </view>
+    <view wx:else class="loading">
+      <text>加载中...</text>
+    </view>
+  </view>
+
+
+
+  <!-- 人脸上传 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">人脸识别</text>
+    </view>
+
+    <view class="face-upload-section">
+      <text class="description">上传清晰的人脸照片用于身份验证</text>
+      <view class="upload-area">
+        <image wx:if="{{faceImage}}" class="face-preview" src="{{faceImage}}" mode="aspectFit"/>
+        <view wx:else class="upload-placeholder">
+          <text class="upload-text">点击上传人脸照片</text>
+        </view>
+      </view>
+      <button class="btn btn-secondary" bindtap="chooseFaceImage">选择照片</button>
+      <button class="btn btn-primary" bindtap="uploadFaceImage" disabled="{{!faceImage || isUploading}}">
+        {{isUploading ? '上传中...' : '上传人脸'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 登录状态 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">登录状态</text>
+    </view>
+    <view wx:if="{{isLoggedIn}}" class="status-logged-in">
+      <text class="status-text">已登录</text>
+      <button class="btn btn-danger" bindtap="logout">退出登录</button>
+    </view>
+    <view wx:else class="status-logged-out">
+      <text class="status-text">未登录</text>
+      <button class="btn btn-primary" bindtap="goToLogin">前往登录</button>
+    </view>
+  </view>
+
+  <!-- 消息提示 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+</view>

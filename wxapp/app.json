@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/profile/profile",
+    "pages/access/access",
+    "pages/visitors/visitors",
+    "pages/more/more",
+    "pages/energy/energy",
+    "pages/repair/repair",
+    "pages/manage/manage",
+    "pages/login/login",
+    "pages/register/register"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#007bff",
+    "navigationBarTitleText": "智安校园宿舍管理系统",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#007bff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/access/access",
+        "text": "通行管理"
+      },
+      {
+        "pagePath": "pages/visitors/visitors",
+        "text": "访客预约"
+      },
+      {
+        "pagePath": "pages/energy/energy",
+        "text": "能耗管理"
+      },
+      {
+        "pagePath": "pages/more/more",
+        "text": "更多"
+      }
+    ]
+  },
+  "requiredBackgroundModes": [],
+  "networkTimeout": {
+    "request": 60000,
+    "downloadFile": 60000
+  }
+}

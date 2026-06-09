@@ -1,0 +1,85 @@
+<!-- pages/manage/manage.wxml -->
+<view class="container">
+  <view class="card">
+    <text class="title">系统管理</text>
+    <text class="subtitle">黑名单管理和用户管理</text>
+  </view>
+
+  <!-- 黑名单列表：修复wx:key为唯一值 -->
+  <view class="card">
+    <view class="section-title">黑名单用户</view>
+    <view class="blacklist-container" wx:if="{{blacklist.length > 0}}">
+      <!-- 关键修复：wx:key用item.id（后端唯一主键），空值时用"blacklist-" + index兜底 -->
+      <view class="blacklist-item" wx:for="{{blacklist}}" wx:key="{{item.id || 'blacklist-' + index}}">
+        <view class="item-info">
+          <text class="user-id">{{item.userId}}</text>
+          <text class="reason">原因：{{item.reasonCn || item.reason}}</text> <!-- 显示中文原因，提升体验 -->
+          <text class="add-time">添加时间：{{item.addTime}}</text>
+        </view>
+        <!-- 修复：确保data-record传递整数类型的id -->
+        <button class="btn-remove" bindtap="removeFromBlacklist" data-record="{{item.id}}">
+          移除
+        </button>
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无黑名单用户</text>
+    </view>
+  </view>
+
+  <!-- 添加黑名单：优化输入提示（明确枚举值要求） -->
+  <view class="card">
+    <view class="section-title">添加黑名单</view>
+    <view class="input-group">
+      <text class="label">用户ID（学号）：</text>
+      <input 
+        class="input" 
+        placeholder="请输入数字学号（如2023001）" 
+        bindinput="onUserIdInput" 
+        value="{{newUserId}}"
+        type="number" <!-- 修复：限制输入为数字，避免非数字学号 -->
+      />
+    </view>
+    <view class="input-group">
+      <text class="label">原因：</text>
+      <input 
+        class="input" 
+        placeholder="请输入：discipline（纪律问题）、security_risk（安全风险）、other（其他）" 
+        bindinput="onReasonInput" 
+        value="{{reason}}"
+      />
+      <!-- 新增：显示可选原因提示，减少输入错误 -->
+      <text class="tip">可选原因：{{reasonLabels.join('、')}}</text>
+    </view>
+    <button class="btn btn-primary" bindtap="addToBlacklist" disabled="{{!newUserId || !reason || isAdding}}">
+      {{isAdding ? '添加中...' : '添加黑名单'}}
+    </button>
+  </view>
+
+  <!-- 用户列表：修复wx:key重复问题 -->
+  <view class="card">
+    <view class="section-title">已注册用户</view>
+    <view class="user-container" wx:if="{{users.length > 0}}">
+      <!-- 关键修复：wx:key用item.id（用户表唯一主键） -->
+      <view class="user-item" wx:for="{{users}}" wx:key="{{item.id}}">
+        <text class="user-id">{{item.username}} (学号：{{item.student_id || '未设置'}})</text>
+        <text class="dormitory">宿舍：{{item.dormitory}}</text> <!-- 新增：显示宿舍信息，便于核对 -->
+      </view>
+    </view>
+    <view class="empty-list" wx:else>
+      <text>暂无注册用户</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮：添加加载状态提示 -->
+  <view class="card">
+    <button class="btn btn-secondary" bindtap="refreshData" disabled="{{isLoading}}">
+      {{isLoading ? '刷新中...' : '刷新数据'}}
+    </button>
+  </view>
+
+  <!-- 消息提示：优化样式区分类型 -->
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType === 'error' ? 'error' : messageType === 'success' ? 'success' : 'info'}}">{{message}}</text>
+  </view>
+</view>

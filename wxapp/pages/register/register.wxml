@@ -1,0 +1,48 @@
+<!-- pages/register/register.wxml -->
+<view class="container">
+  <view class="card">
+    <text class="title">人脸注册</text>
+    <text class="subtitle">请先输入用户ID，然后拍摄人脸照片进行注册</text>
+  </view>
+
+  <view class="card">
+    <view class="input-group">
+      <text class="label">用户ID：</text>
+      <input class="input" placeholder="请输入用户ID" bindinput="onUserIdInput" value="{{userId}}"/>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="camera-container">
+      <camera 
+        class="camera" 
+        device-position="front" 
+        flash="off"
+        binderror="cameraError"
+        bindstop="cameraStop">
+      </camera>
+      <view class="overlay">
+        <view class="countdown" wx:if="{{countdown > 0}}">
+          {{countdown}}秒后自动拍摄
+        </view>
+        <view class="instructions" wx:else>
+          请正对摄像头，保持面部清晰
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <button class="btn btn-primary" bindtap="startRegister" disabled="{{!userId || isRegistering}}">
+      {{isRegistering ? '注册中...' : '开始注册'}}
+    </button>
+    
+    <button class="btn btn-secondary" bindtap="takePhoto" wx:if="{{!isRegistering}}">
+      手动拍照
+    </button>
+  </view>
+
+  <view class="card" wx:if="{{message}}">
+    <text class="message {{messageType}}">{{message}}</text>
+  </view>
+</view>
